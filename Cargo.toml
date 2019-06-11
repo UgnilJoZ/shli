@@ -1,0 +1,11 @@
+[package]
+name = "shli"
+version = "0.0.1"
+authors = ["Jan Ole Zabel <jan.zabel@posteo.de>"]
+edition = "2018"
+description = "Create shell-like TUIs"
+license = "LGPL-3.0-or-later"
+documentation = "https://joz.pub/shli/shli/index.html"
+
+[dependencies]
+termion = "^1"
