@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/UgnilJoZ/shli.svg?branch=master)](https://travis-ci.org/UgnilJoZ/shli)
 # shli
 Rust crate for shell-like TUIs
 
