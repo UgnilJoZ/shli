@@ -36,12 +36,12 @@ impl EscapingState {
     pub fn step(&mut self, ch: char) {
         match ch {
             '"' => {
-                if !self.backslash {
+                if !self.doublequote_escaped() {
                     self.double_quote = !self.double_quote
                 }
             }
             '\'' => {
-                if !self.backslash {
+                if !self.singlequote_escaped() {
                     self.single_quote = !self.single_quote
                 }
             }
