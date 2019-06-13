@@ -2,19 +2,14 @@ use std::io::{stdin, stdout};
 extern crate shli;
 use shli::split;
 use shli::read_commandline;
+use shli::parse::prefix_completion;
 
 fn example_completion(line: &str) -> Vec<String> {
     let cmd = split(&line);
     if cmd.len() == 1 {
-        ["print", "echo", "exit"]
-        .iter()
-        .filter(|&e| {
-            (*e).starts_with(&cmd[0])
-            })
-        .map(|s| s.to_string())
-        .collect()
+        prefix_completion(&cmd[0], &["print", "echo", "exit"])
     } else if cmd.len() == 0 {
-        vec!("print".to_string(), "echo".to_string(), "exit".to_string())
+        prefix_completion("", &["print", "echo", "exit"])
     } else {
         vec!()
     }
