@@ -70,9 +70,15 @@ fn split_backslash_escape() {
 
 #[test]
 fn split_alltogether() {
-	let cmdline = "A \"\'\" B  \'\"\' \\\\ C";
-	let components = &split(cmdline);
-	let normative_components = &["A".to_string(), "\'".to_string(),
-	"B".to_string(), "\"".to_string(), "\\".to_string(), "C".to_string()];
-	assert_eq!(components, normative_components);
+    let cmdline = "A \"\'\" B  \'\"\' \\\\ C";
+    let components = &split(cmdline);
+    let normative_components = &[
+        "A".to_string(),
+        "\'".to_string(),
+        "B".to_string(),
+        "\"".to_string(),
+        "\\".to_string(),
+        "C".to_string(),
+    ];
+    assert_eq!(components, normative_components);
 }

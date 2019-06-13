@@ -1,10 +1,10 @@
-use termion::raw::IntoRawMode;
-use termion::raw::RawTerminal;
 use crate::parse::split;
 use std::io::{Error, ErrorKind, Stdout, Write};
 use termion::cursor;
 use termion::event::Key::{self, Alt, Char, Ctrl};
 use termion::input::TermRead;
+use termion::raw::IntoRawMode;
+use termion::raw::RawTerminal;
 
 /// Prompt for a single command line.
 ///
@@ -36,7 +36,11 @@ pub fn read_commandline(
     let mut line = String::new();
     let mut right_line = String::new();
 
-    fn reprint(stdout: &mut RawTerminal<&mut std::io::Stdout>, line: &String, right_line: &String) -> std::io::Result<()> {
+    fn reprint(
+        stdout: &mut RawTerminal<&mut std::io::Stdout>,
+        line: &String,
+        right_line: &String,
+    ) -> std::io::Result<()> {
         write!(stdout, "\r> {}{}", line, right_line)?;
         if right_line.len() != 0 {
             write!(stdout, "{}", cursor::Left(right_line.len() as u16))?;
@@ -79,15 +83,19 @@ pub fn read_commandline(
                 line.push(ch);
                 reprint(&mut stdout, &line, &right_line)?;
             }
-            Ok(Key::Left) => if let Some(ch) = line.pop() {
-                right_line = format!("{}{}", ch, right_line);
-                write!(stdout, "{}", cursor::Left(1))?;
-                stdout.flush()?;
+            Ok(Key::Left) => {
+                if let Some(ch) = line.pop() {
+                    right_line = format!("{}{}", ch, right_line);
+                    write!(stdout, "{}", cursor::Left(1))?;
+                    stdout.flush()?;
+                }
             }
-            Ok(Key::Right) => if right_line.len() > 0 {
-                line.push(right_line.remove(0));
-                write!(stdout, "{}", cursor::Right(1))?;
-                stdout.flush()?;
+            Ok(Key::Right) => {
+                if right_line.len() > 0 {
+                    line.push(right_line.remove(0));
+                    write!(stdout, "{}", cursor::Right(1))?;
+                    stdout.flush()?;
+                }
             }
             Ok(Ctrl('c')) => {
                 return Err(Error::new(ErrorKind::Other, "Ctrl-C pressed."));
@@ -105,7 +113,7 @@ pub fn read_commandline(
                 // ALT+TAB was pressed.
                 // Remove the last word.
                 let mut words = split(&line);
-                if let Some(w) = words.pop() {
+                if let Some(_) = words.pop() {
                     let old_len = line.len();
                     // Build up the cmdline again
                     line = String::new();
@@ -115,7 +123,12 @@ pub fn read_commandline(
                     }
                     // Wipe removed characters
                     if line.len() < old_len {
-                        write!(stdout, "{}{}", cursor::Left((old_len - line.len()) as u16), " ".repeat(old_len))?;
+                        write!(
+                            stdout,
+                            "{}{}",
+                            cursor::Left((old_len - line.len()) as u16),
+                            " ".repeat(old_len)
+                        )?;
                     }
                     // Now display the new cmdline
                     reprint(&mut stdout, &line, &right_line)?;
