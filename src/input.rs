@@ -49,6 +49,7 @@ pub fn read_commandline(
         match key {
             Ok(Char('\n')) => break,
             Ok(Char('\t')) => {
+                // The tabulator was pressed.
                 let possible_words = completion(&line);
                 if possible_words.len() == 0 {
                 } else if possible_words.len() == 1 {
@@ -101,18 +102,20 @@ pub fn read_commandline(
                 }
             }
             Ok(Alt('\u{7f}')) => {
-                // The tabulator was pressed.
+                // ALT+TAB was pressed.
                 // Remove the last word.
                 let mut words = split(&line);
                 if let Some(w) = words.pop() {
-                    for _ in w.chars() {
-                        write!(stdout, "{} {}", cursor::Left(1), cursor::Left(1))?;
-                    }
-                    // Now build up the cmdline again
+                    let old_len = line.len();
+                    // Build up the cmdline again
                     line = String::new();
                     for word in words {
                         line.push_str(&word);
                         line.push(' ');
+                    }
+                    // Wipe removed characters
+                    if line.len() < old_len {
+                        write!(stdout, "{}{}", cursor::Left((old_len - line.len()) as u16), " ".repeat(old_len))?;
                     }
                     // Now display the new cmdline
                     reprint(&mut stdout, &line, &right_line)?;
