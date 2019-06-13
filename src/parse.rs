@@ -1,13 +1,13 @@
 /// Simple state machine for processing escaping within command line strings.
-/// 
+///
 /// An example usage:
 /// ```
 /// use shli::parse::EscapingState;
-/// 
+///
 /// // This will build the string `some_command "some string\"" "some other string`
 /// let cmdline = "some_command \"some string\\\"\" \"some other string";
 /// let mut state = EscapingState::process(cmdline);
-/// 
+///
 /// // A finished command line string should not pass this assertion.
 /// // This will succeed, because we made an error at `"some other string`.
 /// // A following whitespace would be escaped.
@@ -15,11 +15,11 @@
 /// ```
 #[derive(Debug)]
 pub struct EscapingState {
-	/// A single quote is active.
+    /// A single quote is active.
     pub single_quote: bool,
-	/// A double quote is active.
+    /// A double quote is active.
     pub double_quote: bool,
-	/// A backslash is active.
+    /// A backslash is active.
     pub backslash: bool,
 }
 
@@ -32,23 +32,27 @@ impl EscapingState {
         }
     }
 
-	/// Call this function to proceed on the input string.
+    /// Call this function to proceed on the input string.
     pub fn step(&mut self, ch: char) {
         match ch {
-            '"' => if ! self.backslash {
-                self.double_quote = ! self.double_quote
-            },
-            '\'' => if ! self.backslash {
-                self.single_quote = ! self.single_quote
-            },
+            '"' => {
+                if !self.backslash {
+                    self.double_quote = !self.double_quote
+                }
+            }
+            '\'' => {
+                if !self.backslash {
+                    self.single_quote = !self.single_quote
+                }
+            }
             _ => {}
         }
 
-		if self.backslash {
-			self.backslash = false
-		} else if ch == '\\' {
-			self.backslash = true
-		}
+        if self.backslash {
+            self.backslash = false
+        } else if ch == '\\' {
+            self.backslash = true
+        }
     }
 
     /// If the next character would be whitespace, would it be escaped
@@ -78,52 +82,58 @@ impl EscapingState {
         self.double_quote || self.backslash
     }
 
-	/// Calls `step` for every character in line and returns
-	/// the resulting state
-	pub fn process(line: &str) -> EscapingState {
-		let mut state = EscapingState::new();
-		for ch in line.chars() {
-			state.step(ch);
-		}
-		state
-	}
+    /// Calls `step` for every character in line and returns
+    /// the resulting state
+    pub fn process(line: &str) -> EscapingState {
+        let mut state = EscapingState::new();
+        for ch in line.chars() {
+            state.step(ch);
+        }
+        state
+    }
 }
 
 /// Splits a commandline into its components/arguments.
 /// Works similar to `split_whitespace`.
-/// 
+///
 /// The main difference to `split_whitespace` is:
 /// It respects whitespace escaping (`"`, `'`, `\`) as well as escaping
 /// of the escaping characters (`\"`, `'\'`, …).
 /// Thus, strings (`"A B C"`) will show up as single arguments.
 pub fn split(cmdline: &str) -> Vec<String> {
-    let mut parts = vec!();
+    let mut parts = vec![];
     let mut act = String::new();
     let mut state = EscapingState::new();
     for ch in cmdline.chars() {
-        if ch.is_whitespace() && ! state.whitespace_escaped() {
-            if ! act.is_empty() {
+        if ch.is_whitespace() && !state.whitespace_escaped() {
+            if !act.is_empty() {
                 parts.push(act);
                 act = String::new();
             }
         } else {
             match ch {
-                '"' => if state.doublequote_escaped() {
-                    act.push(ch);
-                },
-                '\'' => if state.singlequote_escaped() {
-                    act.push(ch);
+                '"' => {
+                    if state.doublequote_escaped() {
+                        act.push(ch);
+                    }
                 }
-                '\\' => if state.backslash_escaped() {
-                    act.push(ch);
+                '\'' => {
+                    if state.singlequote_escaped() {
+                        act.push(ch);
+                    }
+                }
+                '\\' => {
+                    if state.backslash_escaped() {
+                        act.push(ch);
+                    }
                 }
                 ch => act.push(ch),
             }
         }
         state.step(ch);
     }
-	if ! act.is_empty() {
-    	parts.push(act);
-	}
+    if !act.is_empty() {
+        parts.push(act);
+    }
     parts
 }
