@@ -6,7 +6,7 @@ use shli::read_commandline;
 fn example_completion(line: &str) -> Vec<String> {
     let cmd = split(&line);
     if cmd.len() == 1 {
-        ["Hallo", "Tschüs", "exit"]
+        ["print", "echo", "exit"]
         .iter()
         .filter(|&e| {
             (*e).starts_with(&cmd[0])
@@ -14,7 +14,7 @@ fn example_completion(line: &str) -> Vec<String> {
         .map(|s| s.to_string())
         .collect()
     } else if cmd.len() == 0 {
-        vec!("Hallo".to_string(), "Tschüs".to_string(), "exit".to_string())
+        vec!("print".to_string(), "echo".to_string(), "exit".to_string())
     } else {
         vec!()
     }
@@ -30,6 +30,13 @@ fn main() {
                 if ! line.is_empty() {
                     match line[0].as_str() {
                         "exit" => break,
+                        "print" | "echo" => if line.len() > 1 {
+                            let mut output = line[1].clone();
+                            for w in &line[2..] {
+                                output.push_str(&format!(" {}", w));
+                            }
+                            println!("{}", output);
+                        }
                         cmd => println!("{} hab ich jetzt nicht so gefunden!", cmd),
                     }
                 }
