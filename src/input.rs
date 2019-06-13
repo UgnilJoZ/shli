@@ -1,9 +1,10 @@
+use termion::raw::IntoRawMode;
+use termion::raw::RawTerminal;
 use crate::parse::split;
 use std::io::{Error, ErrorKind, Stdout, Write};
 use termion::cursor;
 use termion::event::Key::{self, Alt, Char, Ctrl};
 use termion::input::TermRead;
-use termion::raw::IntoRawMode;
 
 /// Prompt for a single command line.
 ///
@@ -29,10 +30,20 @@ pub fn read_commandline(
     stdout: &mut Stdout,
     completion: impl Fn(&str) -> Vec<String>,
 ) -> std::io::Result<Vec<String>> {
-    let mut stdout = stdout.into_raw_mode().unwrap();
+    let mut stdout = stdout.into_raw_mode()?;
     write!(stdout, "> ")?;
     stdout.flush()?;
     let mut line = String::new();
+    let mut right_line = String::new();
+
+    fn reprint(stdout: &mut RawTerminal<&mut std::io::Stdout>, line: &String, right_line: &String) -> std::io::Result<()> {
+        write!(stdout, "\r> {}{}", line, right_line)?;
+        if right_line.len() != 0 {
+            write!(stdout, "{}", cursor::Left(right_line.len() as u16))?;
+        }
+        stdout.flush()?;
+        Ok(())
+    };
 
     for key in stdin.keys() {
         match key {
@@ -52,8 +63,7 @@ pub fn read_commandline(
                         line.push(' ');
                     }
                     // Now display the new cmdline
-                    write!(stdout, "\r> {}", line)?;
-                    stdout.flush()?;
+                    reprint(&mut stdout, &line, &right_line)?;
                 } else {
                     // Display the possibilities
                     write!(
@@ -65,9 +75,18 @@ pub fn read_commandline(
                 }
             }
             Ok(Char(ch)) => {
-                write!(stdout, "{}", ch)?;
-                stdout.flush()?;
                 line.push(ch);
+                reprint(&mut stdout, &line, &right_line)?;
+            }
+            Ok(Key::Left) => if let Some(ch) = line.pop() {
+                right_line = format!("{}{}", ch, right_line);
+                write!(stdout, "{}", cursor::Left(1))?;
+                stdout.flush()?;
+            }
+            Ok(Key::Right) => if right_line.len() > 0 {
+                line.push(right_line.remove(0));
+                write!(stdout, "{}", cursor::Right(1))?;
+                stdout.flush()?;
             }
             Ok(Ctrl('c')) => {
                 return Err(Error::new(ErrorKind::Other, "Ctrl-C pressed."));
@@ -85,16 +104,24 @@ pub fn read_commandline(
                 // The tabulator was pressed.
                 // Remove the last word.
                 let mut words = split(&line);
-                while let Some(_) = words.pop() {
-                    if line.pop().is_some() {
+                if let Some(w) = words.pop() {
+                    for _ in w.chars() {
                         write!(stdout, "{} {}", cursor::Left(1), cursor::Left(1))?;
                     }
+                    // Now build up the cmdline again
+                    line = String::new();
+                    for word in words {
+                        line.push_str(&word);
+                        line.push(' ');
+                    }
+                    // Now display the new cmdline
+                    reprint(&mut stdout, &line, &right_line)?;
                 }
-                stdout.flush()?;
             }
             Ok(_) => {} //{println!("{:?}", sonst)}
             Err(e) => return Err(e),
         }
     }
+    line.push_str(&right_line);
     Ok(split(&line))
 }
