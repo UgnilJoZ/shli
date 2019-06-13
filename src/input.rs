@@ -8,71 +8,22 @@ use crate::parse::split;
 /// Prompt for a single command line.
 /// 
 /// This function reads and returns a command line, after prompting with `> `.
-/// Line editing with backspace and ALT+backspace is supported. If TAB is pressed, the
-/// callback function `completion` is asked for possible argument completion. If it returns
-/// exactly 1 completion, it is used, if it returns more, they are displayed.
+/// Line editing with backspace and ALT+backspace is supported.
+/// 
+/// If TAB is pressed by the user, the callback function `completion` is asked
+/// for possible argument completion. If it returns exactly 1 completion, it
+/// is used, if it returns more, they are displayed.
 /// 
 /// If Ctrl+C is pressed, this function returns `Err(Error::new(ErrorKind::Other, "Ctrl-C pressed.")`,
 /// while an EOF of `stdin` or Ctrl+D will return the error type `ErrorKind::UnexpectedEof`.
 /// 
 /// On success, `read_commandline` returns a Vector of command line components (command + arguments).
 /// 
-/// An example:
-/// ```rust,no_run
-/// use std::io::{stdin, stdout};
-/// extern crate shli;
-/// use shli::split;
-/// use shli::read_commandline;
-/// 
-/// fn example_completion(line: &str) -> Vec<String> {
-///     let cmd = split(&line);
-///     if cmd.len() == 1 {
-///         ["Hallo", "Tschüs", "exit"]
-///         .iter()
-///         .filter(|&e| {
-///             (*e).starts_with(&cmd[0])
-///             })
-///         .map(|s| s.to_string())
-///         .collect()
-///     } else if cmd.len() == 0 {
-///         vec!("Hallo".to_string(), "Tschüs".to_string(), "exit".to_string())
-///     } else {
-///         vec!()
-///     }
-/// }
-/// 
-/// fn main() {
-///     loop {
-///         let stdin = stdin();
-///         let line_result = read_commandline(stdin.lock(), &mut stdout(), example_completion);
-///         match line_result {
-///             Ok(line) => {
-///                 println!("");
-///                 if ! line.is_empty() {
-///                     match line[0].as_str() {
-///                         "exit" => break,
-///                         cmd => println!("I din't find {}!", cmd),
-///                     }
-///                 }
-///             }
-///             Err(e) => {
-///                 match e.kind() {
-///                     std::io::ErrorKind::UnexpectedEof => {
-///                         println!("exit");
-///                         break;
-///                     }
-///                     std::io::ErrorKind::Other => {
-///                         println!("\nCtrl+C pressed.");
-///                     }
-///                     _ => {
-///                         println!("Reading error: {:?}", e);
-///                     }
-///                 };
-///             }
-///         }
-///     }
-/// }
+/// For example, the following input:
+/// ```text
+/// > print out "example command"
 /// ```
+/// will return `vec!["print", "out", "example command"]`.
 pub fn read_commandline(stdin: std::io::StdinLock<>, stdout: &mut Stdout, completion: impl Fn(&str) -> Vec<String>) -> std::io::Result<Vec<String>> {
     let mut stdout = stdout.into_raw_mode().unwrap();
     write!(stdout, "> ")?;
@@ -123,7 +74,8 @@ pub fn read_commandline(stdin: std::io::StdinLock<>, stdout: &mut Stdout, comple
                 }
             }
             Ok(Alt('\u{7f}')) => {
-				// First, remove the last word
+				// The tabulator was pressed.
+				// Remove the last word.
                 let mut words = split(&line);
                 while let Some(_) = words.pop() {
 					if line.pop().is_some() {

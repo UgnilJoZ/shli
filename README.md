@@ -8,4 +8,4 @@ If you once saw nslookup, glusterfs or shelldap and admired their shell-like int
 This crate provides basic building blocks for such an interface.
 
 ## Documentation
-https://joz.pub/shli/shli/
+https://docs.rs/shli/

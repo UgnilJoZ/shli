@@ -5,7 +5,8 @@ authors = ["Jan Ole Zabel <jan.zabel@posteo.de>"]
 edition = "2018"
 description = "Create shell-like TUIs"
 license = "LGPL-3.0-or-later"
-documentation = "https://joz.pub/shli/shli/index.html"
+documentation = "https://docs.rs/shli/"
+repository = "https://github.com/UgnilJoZ/shli"
 
 [dependencies]
 termion = "^1"
