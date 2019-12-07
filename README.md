@@ -10,5 +10,8 @@ If you once saw nslookup, glusterfs or shelldap and admired their shell-like int
 
 This crate provides basic building blocks for such an interface.
 
+## Example usage
+See `examples/simple.rs`. `cargo run --example simple`
+
 ## Documentation
 https://docs.rs/shli/

@@ -7,19 +7,14 @@
 //! extern crate shli;
 //! use shli::split;
 //! use shli::read_commandline;
+//! use shli::parse::prefix_completion;
 //!
 //! fn example_completion(line: &str) -> Vec<String> {
 //!     let cmd = split(&line);
 //!     if cmd.len() == 1 {
-//!         ["Hallo", "Tschüs", "exit"]
-//!         .iter()
-//!         .filter(|&e| {
-//!             (*e).starts_with(&cmd[0])
-//!             })
-//!         .map(|s| s.to_string())
-//!         .collect()
+//!         prefix_completion(&cmd[0], &["Hallo", "Tschüs", "exit"])
 //!     } else if cmd.len() == 0 {
-//!         vec!("Hallo".to_string(), "Tschüs".to_string(), "exit".to_string())
+//!         prefix_completion("", &["Hallo", "Tschüs", "exit"])
 //!     } else {
 //!         vec!()
 //!     }
