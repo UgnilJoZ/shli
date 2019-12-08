@@ -3,34 +3,39 @@
 //!
 //! An example:
 //! ```no_run
-//! use std::io::{stdin, stdout};
 //! extern crate shli;
 //! use shli::split;
-//! use shli::read_commandline;
 //! use shli::parse::prefix_completion;
-//!
+//! use shli::Prompt;
+//! 
 //! fn example_completion(line: &str) -> Vec<String> {
 //!     let cmd = split(&line);
 //!     if cmd.len() == 1 {
-//!         prefix_completion(&cmd[0], &["Hallo", "Tschüs", "exit"])
+//!         prefix_completion(&cmd[0], &["print", "echo", "exit"])
 //!     } else if cmd.len() == 0 {
-//!         prefix_completion("", &["Hallo", "Tschüs", "exit"])
+//!         prefix_completion("", &["print", "echo", "exit"])
 //!     } else {
 //!         vec!()
 //!     }
 //! }
-//!
+//! 
 //! fn main() {
+//!     let p = Prompt::new("> ".to_string(), example_completion);
 //!     loop {
-//!         let stdin = stdin();
-//!         let line_result = read_commandline(stdin.lock(), &mut stdout(), example_completion);
-//!         match line_result {
+//!         match p.read_commandline() {
 //!             Ok(line) => {
 //!                 println!("");
 //!                 if ! line.is_empty() {
 //!                     match line[0].as_str() {
 //!                         "exit" => break,
-//!                         cmd => println!("I din't find {}!", cmd),
+//!                         "print" | "echo" => if line.len() > 1 {
+//!                             let mut output = line[1].clone();
+//!                             for w in &line[2..] {
+//!                                 output.push_str(&format!(" {}", w));
+//!                             }
+//!                             println!("{}", output);
+//!                         }
+//!                         cmd => println!("Did not find '{}' command!", cmd),
 //!                     }
 //!                 }
 //!             }
@@ -55,11 +60,12 @@
 
 extern crate termion;
 
-pub mod input;
+pub mod prompt;
 pub mod parse;
 
-pub use input::read_commandline;
+pub use prompt::Prompt;
 pub use parse::split;
+pub use parse::prefix_completion;
 
 #[cfg(test)]
 mod tests;

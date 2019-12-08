@@ -139,11 +139,12 @@ pub fn split(cmdline: &str) -> Vec<String> {
 }
 
 /// A completion callback must return a `Vec<String>` of
-/// possibilities for the current argument. For instance,
-/// if the possible flags for a subcommand are `["--help,
-/// "--halt", "--destroy]` and the user typed in `--h`
-/// before requesting completion, the completion function
-/// has to filter for every word in the wordlist starting
+/// possibilities for the current argument.
+/// 
+/// For instance, if the possible flags for a subcommand are
+/// `["--help, "--halt", "--destroy]` and the user typed in
+/// `--h` before requesting completion, the completion function
+/// has to return every word in the wordlist starting
 /// with that prefix. (`["--halt", "--help"]`)
 /// 
 /// Imagine the following function.

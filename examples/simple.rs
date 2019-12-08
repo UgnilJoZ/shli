@@ -1,8 +1,7 @@
-use std::io::{stdin, stdout};
 extern crate shli;
 use shli::split;
-use shli::read_commandline;
 use shli::parse::prefix_completion;
+use shli::Prompt;
 
 fn example_completion(line: &str) -> Vec<String> {
     let cmd = split(&line);
@@ -16,10 +15,9 @@ fn example_completion(line: &str) -> Vec<String> {
 }
 
 fn main() {
+    let p = Prompt::new("> ".to_string(), example_completion);
     loop {
-        let stdin = stdin();
-        let line_result = read_commandline(stdin.lock(), &mut stdout(), example_completion);
-        match line_result {
+        match p.read_commandline() {
             Ok(line) => {
                 println!("");
                 if ! line.is_empty() {
@@ -32,7 +30,7 @@ fn main() {
                             }
                             println!("{}", output);
                         }
-                        cmd => println!("{} hab ich jetzt nicht so gefunden!", cmd),
+                        cmd => println!("Did not find '{}' command!", cmd),
                     }
                 }
             }
