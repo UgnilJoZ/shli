@@ -20,7 +20,7 @@
 //! }
 //! 
 //! fn main() {
-//!     let p = Prompt::new("> ".to_string(), example_completion);
+//!     let mut p = Prompt::new("> ".to_string(), example_completion);
 //!     loop {
 //!         match p.read_commandline() {
 //!             Ok(line) => {

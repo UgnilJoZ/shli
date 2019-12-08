@@ -1,6 +1,6 @@
 [package]
 name = "shli"
-version = "0.1.1"
+version = "0.2.0"
 authors = ["Jan Ole Zabel <jan.zabel@posteo.de>"]
 edition = "2018"
 description = "Create shell-like TUIs"
