@@ -13,7 +13,7 @@ fn reprint(
 	line: &String,
 	right_line: &String,
 ) -> std::io::Result<()> {
-	write!(stdout, "T\r{}{}{}", prompt, line, right_line)?;
+	write!(stdout, "\r{}{}{}", prompt, line, right_line)?;
 	if right_line.len() != 0 {
 		write!(stdout, "{}", cursor::Left(right_line.len() as u16))?;
 	}
@@ -43,6 +43,7 @@ fn reprint(
 pub struct Prompt {
 	pub prompt_text: String,
 	pub completion: Box<dyn Fn(&str) -> Vec<String>>,
+	pub history: Vec<String>,
 }
 
 impl Prompt {
@@ -50,6 +51,7 @@ impl Prompt {
 		Prompt {
 			prompt_text: prompt_text,
 			completion: Box::new(completion),
+			history: vec!(),
 		}
 	}
 
@@ -72,7 +74,7 @@ impl Prompt {
 	/// > print out "example command"
 	/// ```
 	/// will return `vec!["print", "out", "example command"]`.
-	pub fn read_commandline(&self) -> std::io::Result<Vec<String>> {
+	pub fn read_commandline(&mut self) -> std::io::Result<Vec<String>> {
 		let stdout = stdout();
 		let mut stdout = stdout.lock().into_raw_mode()?;
 		let stdin = stdin();
@@ -81,6 +83,7 @@ impl Prompt {
 		stdout.flush()?;
 		let mut line = String::new();
 		let mut right_line = String::new();
+		let mut history_offset = 0;
 	
 		for key in stdin.keys() {
 			match key {
@@ -130,6 +133,21 @@ impl Prompt {
 						stdout.flush()?;
 					}
 				}
+				Ok(Key::Up) => {
+					if history_offset < self.history.len() {
+						history_offset += 1;
+						if let Some(new_cmd_line) = self.history.get(self.history.len() - history_offset) {
+							let chars_to_wipe = self.prompt_text.len() + line.len() + right_line.len();
+							line = new_cmd_line.clone();
+							write!(stdout, "\r")?;
+							for _ in 0..chars_to_wipe {
+								write!(stdout, " ")?;
+							}
+							right_line = String::new();
+							reprint(&mut stdout, &self.prompt_text, &line, &right_line)?
+						}
+					}
+				}
 				Ok(Ctrl('c')) => {
 					return Err(Error::new(ErrorKind::Other, "Ctrl-C pressed."));
 				}
@@ -172,6 +190,7 @@ impl Prompt {
 			}
 		}
 		line.push_str(&right_line);
+		self.history.push(line.clone());
 		Ok(split(&line))
 	}
 	
