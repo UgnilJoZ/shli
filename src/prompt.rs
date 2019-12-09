@@ -7,20 +7,6 @@ use termion::raw::IntoRawMode;
 use termion::raw::RawTerminal;
 use std::io::{stdin, stdout};
 
-fn reprint(
-	stdout: &mut RawTerminal<std::io::StdoutLock>,
-	prompt: &str,
-	line: &String,
-	right_line: &String,
-) -> std::io::Result<()> {
-	write!(stdout, "\r{}{}{}", prompt, line, right_line)?;
-	if right_line.len() != 0 {
-		write!(stdout, "{}", cursor::Left(right_line.len() as u16))?;
-	}
-	stdout.flush()?;
-	Ok(())
-}
-
 /// Config struct for building command line interfaces.
 /// An example:
 /// ```
@@ -53,6 +39,21 @@ impl Prompt {
 			completion: Box::new(completion),
 			history: vec!(),
 		}
+	}
+
+	/// Reprint the command line in the current terminal line.
+	/// `right_line` refers to the command part supposed to be right from the cursor.
+	fn reprint(&mut self,
+		stdout: &mut RawTerminal<std::io::StdoutLock>,
+		line: &String,
+		right_line: &String,
+	) -> std::io::Result<()> {
+		write!(stdout, "\r{}{}{}", &self.prompt_text, line, right_line)?;
+		if right_line.len() != 0 {
+			write!(stdout, "{}", cursor::Left(right_line.len() as u16))?;
+		}
+		stdout.flush()?;
+		Ok(())
 	}
 
 	/// Prompt for a single command line.
@@ -104,7 +105,7 @@ impl Prompt {
 							line.push(' ');
 						}
 						// Now display the new cmdline
-						reprint(&mut stdout, &self.prompt_text, &line, &right_line)?;
+						self.reprint(&mut stdout, &line, &right_line)?;
 					} else {
 						// Display the possibilities
 						write!(
@@ -117,7 +118,7 @@ impl Prompt {
 				}
 				Ok(Char(ch)) => {
 					line.push(ch);
-					reprint(&mut stdout, &self.prompt_text, &line, &right_line)?;
+					self.reprint(&mut stdout, &line, &right_line)?;
 				}
 				Ok(Key::Left) => {
 					if let Some(ch) = line.pop() {
@@ -144,7 +145,7 @@ impl Prompt {
 								write!(stdout, " ")?;
 							}
 							right_line = String::new();
-							reprint(&mut stdout, &self.prompt_text, &line, &right_line)?
+							self.reprint(&mut stdout, &line, &right_line)?
 						}
 					}
 				}
@@ -182,7 +183,7 @@ impl Prompt {
 							)?;
 						}
 						// Now display the new cmdline
-						reprint(&mut stdout, &self.prompt_text, &line, &right_line)?;
+						self.reprint(&mut stdout, &line, &right_line)?;
 					}
 				}
 				Ok(_) => {}
