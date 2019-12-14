@@ -1,4 +1,4 @@
-[![Crates.io](https://img.shields.io/crates/v/shli.svg)](https://docs.rs/shli/)
+[![Crates.io](https://img.shields.io/crates/v/shli.svg)](https://crates.io/crates/shli)
 [![Build Status](https://travis-ci.org/UgnilJoZ/shli.svg?branch=master)](https://travis-ci.org/UgnilJoZ/shli)
 [![Documentation](https://docs.rs/shli/badge.svg)](https://docs.rs/crate/shli/)
 
