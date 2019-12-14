@@ -138,39 +138,6 @@ pub fn split(cmdline: &str) -> Vec<String> {
     parts
 }
 
-/// A completion callback must return a `Vec<String>` of
-/// possibilities for the current argument.
-/// 
-/// For instance, if the possible flags for a subcommand are
-/// `["--help, "--halt", "--destroy]` and the user typed in
-/// `--h` before requesting completion, the completion function
-/// has to return every word in the wordlist starting
-/// with that prefix. (`["--halt", "--help"]`)
-/// 
-/// Imagine the following callback function.
-/// It was simplified using the convenience function `prefix_completion`.
-/// ```norun
-/// fn example_completion(line: &str) -> Vec<String> {
-///     let cmd = split(&line);
-///     if cmd.len() == 1 {
-///         prefix_completion(&cmd[0], &["print", "echo", "exit"])
-///     } else if cmd.len() == 0 {
-///         prefix_completion("", &["print", "echo", "exit"])
-///     } else {
-///         vec!()
-///     }
-/// }
-/// ```
-pub fn prefix_completion(word: &str, wordlist: &[&str]) -> Vec<String> {
-    wordlist
-        .iter()
-        .filter(|&e| {
-            (*e).starts_with(word)
-            })
-        .map(|s| s.to_string())
-        .collect()
-}
-
 
 pub fn ends_with_whitespace(text: &str) -> bool {
     if let Some(ch) = text.chars().last() {
