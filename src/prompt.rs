@@ -1,4 +1,4 @@
-use crate::parse::split;
+use crate::parse::{split, ends_with_whitespace};
 use std::io::{Error, ErrorKind, Write};
 use termion::cursor;
 use termion::event::Key::{self, Alt, Char, Ctrl};
@@ -6,6 +6,7 @@ use termion::input::TermRead;
 use termion::raw::IntoRawMode;
 use termion::raw::RawTerminal;
 use std::io::{stdin, stdout};
+use crate::completion::{Command, complete, CompletionResult};
 
 /// Config struct for building command line interfaces.
 /// An example:
@@ -28,31 +29,71 @@ use std::io::{stdin, stdout};
 /// Now, use the `read_commandline` method to let the user type a command.
 pub struct Prompt {
 	pub prompt_text: String,
-	pub completion: Box<dyn Fn(&str) -> Vec<String>>,
 	pub history: Vec<String>,
+	pub commands: Vec<Command>,
 }
 
 impl Prompt {
-	pub fn new(prompt_text: String, completion: impl Fn(&str) -> Vec<String> + 'static,) -> Prompt {
+	/// Creates a new Prompt instance.
+	/// 
+	/// `prompt_text` is the text written before the user input.
+	/// `commands` is the list of available commands used by tab completion.
+	pub fn new(prompt_text: String, commands: Vec<Command>) -> Prompt {
 		Prompt {
 			prompt_text: prompt_text,
-			completion: Box::new(completion),
 			history: vec!(),
+			commands: commands,
 		}
 	}
 
 	/// Reprint the command line in the current terminal line.
 	/// `right_line` refers to the command part supposed to be right from the cursor.
-	fn reprint(&mut self,
+	fn reprint(&self,
 		stdout: &mut RawTerminal<std::io::StdoutLock>,
-		line: &String,
-		right_line: &String,
+		line: &str,
+		right_line: &str,
 	) -> std::io::Result<()> {
 		write!(stdout, "\r{}{}{}", &self.prompt_text, line, right_line)?;
 		if right_line.len() != 0 {
 			write!(stdout, "{}", cursor::Left(right_line.len() as u16))?;
 		}
 		stdout.flush()?;
+		Ok(())
+	}
+
+	fn completion(&self, stdout: &mut RawTerminal<std::io::StdoutLock>, line: &mut String, right_line: &str) -> std::io::Result<()> {
+		match complete(&line, &self.commands) {
+			CompletionResult::None => {}
+			CompletionResult::Description(description) => {
+				write!(stdout, "\n\r Parameter help: {}\n\r> {}", description, line)?;
+			}
+			CompletionResult::PossibilityList(possible_words) => {
+				if possible_words.len() == 1 {
+					// First, replace the last word
+					let mut words = split(&line);
+					if ! ends_with_whitespace(&line) {
+						words.pop();
+					}
+					words.push(possible_words[0].clone());
+					// Now build up the cmdline again
+					*line = String::new();
+					for word in words {
+						line.push_str(&word);
+						line.push(' ');
+					}
+					// Now display the new cmdline
+					self.reprint(stdout, &line, right_line)?;
+				} else if possible_words.len() > 1 {
+					// Display the possibilities
+					write!(
+						stdout,
+						"\n\r Completions: {:?}\n\r> {}",
+						possible_words, line
+					)?;
+					stdout.flush()?;
+				}
+			}
+		};
 		Ok(())
 	}
 
@@ -91,47 +132,24 @@ impl Prompt {
 				Ok(Char('\n')) => break,
 				Ok(Char('\t')) => {
 					// The tabulator was pressed.
-					let possible_words = (self.completion)(&line);
-					if possible_words.len() == 0 {
-					} else if possible_words.len() == 1 {
-						// First, replace the last word
-						let mut words = split(&line);
-						words.pop();
-						words.push(possible_words[0].clone());
-						// Now build up the cmdline again
-						line = String::new();
-						for word in words {
-							line.push_str(&word);
-							line.push(' ');
-						}
-						// Now display the new cmdline
-						self.reprint(&mut stdout, &line, &right_line)?;
-					} else {
-						// Display the possibilities
-						write!(
-							stdout,
-							"\n\r Completions: {:?}\n\r> {}",
-							possible_words, line
-						)?;
-						stdout.flush()?;
-					}
+					self.completion(&mut stdout, &mut line, &right_line)?
 				}
 				Ok(Char(ch)) => {
 					line.push(ch);
-					self.reprint(&mut stdout, &line, &right_line)?;
+					self.reprint(&mut stdout, &line, &right_line)?
 				}
 				Ok(Key::Left) => {
 					if let Some(ch) = line.pop() {
 						right_line = format!("{}{}", ch, right_line);
 						write!(stdout, "{}", cursor::Left(1))?;
-						stdout.flush()?;
+						stdout.flush()?
 					}
 				}
 				Ok(Key::Right) => {
 					if right_line.len() > 0 {
 						line.push(right_line.remove(0));
 						write!(stdout, "{}", cursor::Right(1))?;
-						stdout.flush()?;
+						stdout.flush()?
 					}
 				}
 				Ok(Key::Up) => {
@@ -162,7 +180,7 @@ impl Prompt {
 					}
 				}
 				Ok(Alt('\u{7f}')) => {
-					// ALT+TAB was pressed.
+					// ALT+← was pressed.
 					// Remove the last word.
 					let mut words = split(&line);
 					if let Some(_) = words.pop() {

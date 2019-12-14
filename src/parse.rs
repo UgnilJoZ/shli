@@ -8,9 +8,9 @@
 /// let cmdline = "some_command \"some string\\\"\" \"some other string";
 /// let mut state = EscapingState::process(cmdline);
 ///
+/// // This assertion means that a following whitespace would be escaped.
 /// // A finished command line string should not pass this assertion.
 /// // This will succeed, because we made an error at `"some other string`.
-/// // A following whitespace would be escaped.
 /// assert!(state.whitespace_escaped())
 /// ```
 #[derive(Debug)]
@@ -75,9 +75,9 @@ impl EscapingState {
         self.double_quote || self.backslash
     }
 
-    /// If the next character would be a backslash (`\\`), would it
+    /// If the next character would be a backslash (`\`), would it
     /// be escaped or would it itself be viewed as escape character?
-    /// (`\\\\`)
+    /// (`\\`)
     pub fn backslash_escaped(&self) -> bool {
         self.double_quote || self.backslash
     }
@@ -147,7 +147,7 @@ pub fn split(cmdline: &str) -> Vec<String> {
 /// has to return every word in the wordlist starting
 /// with that prefix. (`["--halt", "--help"]`)
 /// 
-/// Imagine the following function.
+/// Imagine the following callback function.
 /// It was simplified using the convenience function `prefix_completion`.
 /// ```norun
 /// fn example_completion(line: &str) -> Vec<String> {
@@ -169,4 +169,13 @@ pub fn prefix_completion(word: &str, wordlist: &[&str]) -> Vec<String> {
             })
         .map(|s| s.to_string())
         .collect()
+}
+
+
+pub fn ends_with_whitespace(text: &str) -> bool {
+    if let Some(ch) = text.chars().last() {
+        return ch.is_whitespace()
+    } else {
+        false
+    }
 }

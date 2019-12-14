@@ -1,21 +1,14 @@
 extern crate shli;
-use shli::split;
-use shli::parse::prefix_completion;
+use shli::completion::Command;
 use shli::Prompt;
 
-fn example_completion(line: &str) -> Vec<String> {
-    let cmd = split(&line);
-    if cmd.len() == 1 {
-        prefix_completion(&cmd[0], &["print", "echo", "exit"])
-    } else if cmd.len() == 0 {
-        prefix_completion("", &["print", "echo", "exit"])
-    } else {
-        vec!()
-    }
-}
-
 fn main() {
-    let mut p = Prompt::new("> ".to_string(), example_completion);
+    let mut p = Prompt::new("> ".to_string(), vec!(
+        Command::new("print"),
+        Command::new("echo"),
+        Command::new("cat").arg("--help"),
+        Command::new("exit")
+    ));
     loop {
         match p.read_commandline() {
             Ok(line) => {

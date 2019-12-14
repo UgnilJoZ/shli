@@ -62,6 +62,7 @@ extern crate termion;
 
 pub mod prompt;
 pub mod parse;
+pub mod completion;
 
 pub use prompt::Prompt;
 pub use parse::split;
