@@ -11,22 +11,18 @@ use crate::completion::{Command, complete, CompletionResult};
 /// Config struct for building command line interfaces.
 /// An example:
 /// ```
-/// use shli::{Prompt,prefix_completion,split};
+/// use shli::{Prompt,Command};
 /// 
-/// fn example_completion(line: &str) -> Vec<String> {
-///     let cmd = split(&line);
-///     if cmd.len() == 1 {
-///         prefix_completion(&cmd[0], &["print", "echo", "exit"])
-///     } else if cmd.len() == 0 {
-///         prefix_completion("", &["print", "echo", "exit"])
-///     } else {
-///         vec!()
-///     }
-/// }
-/// 
-/// let p = Prompt::new("> ".to_string(), example_completion);
+/// let mut p = Prompt::new("> ".to_string(), vec!(
+/// 	Command::new("print"),
+/// 	Command::new("echo"),
+/// 	Command::new("cat").arg("--help"),
+/// 	Command::new("exit")
+/// ));
 /// ```
 /// Now, use the `read_commandline` method to let the user type a command.
+/// 
+/// It will tab complete `print`, `echo`, `cat`, `cat --help` and `exit`.
 pub struct Prompt {
 	pub prompt_text: String,
 	pub history: Vec<String>,

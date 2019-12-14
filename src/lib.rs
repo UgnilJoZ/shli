@@ -5,22 +5,15 @@
 //! ```no_run
 //! extern crate shli;
 //! use shli::split;
-//! use shli::parse::prefix_completion;
+//! use shli::completion::Command;
 //! use shli::Prompt;
 //! 
-//! fn example_completion(line: &str) -> Vec<String> {
-//!     let cmd = split(&line);
-//!     if cmd.len() == 1 {
-//!         prefix_completion(&cmd[0], &["print", "echo", "exit"])
-//!     } else if cmd.len() == 0 {
-//!         prefix_completion("", &["print", "echo", "exit"])
-//!     } else {
-//!         vec!()
-//!     }
-//! }
-//! 
 //! fn main() {
-//!     let mut p = Prompt::new("> ".to_string(), example_completion);
+//!     let mut p = Prompt::new("> ".to_string(), vec!(
+//! 		Command::new("print").arg("--help"),
+//! 		Command::new("echo"),
+//! 		Command::new("exit")
+//! 	));
 //!     loop {
 //!         match p.read_commandline() {
 //!             Ok(line) => {
@@ -66,7 +59,7 @@ pub mod completion;
 
 pub use prompt::Prompt;
 pub use parse::split;
-pub use parse::prefix_completion;
+pub use completion::Command;
 
 #[cfg(test)]
 mod tests;
