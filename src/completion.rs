@@ -54,9 +54,17 @@ impl From<&str> for Argument {
 /// arbitrary arguments or even subcommands. They all can
 /// be displayed or even tab-completed, when described in
 /// this data structure's attributes.
+/// ```
+/// use shli::Command;
+/// 
+/// let cmd = Command::new("exit");
+/// ```
 pub struct Command {
+	/// The name of the command that shall be completed
 	pub name: String,
+	/// If calling completion after the name, the arguments may be completed
 	pub args: Vec<Argument>,
+	/// If calling completion after a subcommand, it may be completed
 	pub subcommands: Vec<Command>,
 }
 
@@ -71,12 +79,25 @@ impl Command {
 	}
 
 	/// Add a subcommand to this command
+	/// 
+	/// ```
+	/// use shli::Command;
+	/// 
+	/// let cmd = Command::new("config")
+	/// 	.subcommand(Command::new("commit"));
+	/// ```
 	pub fn subcommand(mut self, cmd: Command) -> Command {
 		self.subcommands.push(cmd);
 		self
 	}
 
 	/// Add a concrete argument (e.g. a flag) to this command
+	/// 
+	/// ```
+	/// use shli::Command;
+	/// 
+	/// let cmd = Command::new("config").arg("--help");
+	/// ```
 	pub fn arg<T: Into<Argument>>(mut self, arg: T) -> Command {
 		self.args.push(arg.into());
 		self
@@ -126,6 +147,9 @@ fn get_possible_completions(cmd: &Command) -> CompletionResult {
 	CompletionResult::PossibilityList(list)
 }
 
+/// Generate completions for `previous`
+/// 
+/// `previous` is supposed to be the user string left from the cursor
 pub fn complete(previous: &str, commands: &[Command]) -> CompletionResult {
 	if previous.is_empty() {
 		let possible_commands = command_names(commands);
