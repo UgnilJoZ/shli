@@ -1,4 +1,4 @@
-use crate::parse::split;
+use crate::split::split;
 
 /// A (sub)command may have arbitrary arguments, which the `Prompt`
 /// may describe to the user, when prompted for tab completion.
@@ -119,7 +119,7 @@ fn command_names(commands: &[Command]) -> Vec<String> {
 }
 
 /// Researches where in the command tree we are at the end of `cmdline`.
-fn active_command<'a>(cmdline: &Vec<String>, commands: &'a [Command]) -> Option<&'a Command> {
+fn active_command<'a>(cmdline: &[String], commands: &'a [Command]) -> Option<&'a Command> {
 	let mut result = None;
 	for component in cmdline {
 		for command in commands {
@@ -161,7 +161,7 @@ pub fn complete(previous: &str, commands: &[Command]) -> CompletionResult {
 	} else {
 		let mut components = split(previous);
 		// If the last character is not whitespace, the user is still typing the last component (word).
-		// Let's not take it into account when researching flags for the current command.
+		// Let's not take it into account when researching the current command.
 		// Instead, complete it.
 		// Else, the last component is completely typed in.
 

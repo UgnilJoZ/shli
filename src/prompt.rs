@@ -1,4 +1,4 @@
-use crate::parse::{split, ends_with_whitespace};
+use crate::split::{split, ends_with_whitespace};
 use std::io::{Error, ErrorKind, Write};
 use termion::cursor;
 use termion::event::Key::{self, Alt, Char, Ctrl};

@@ -54,11 +54,11 @@
 extern crate termion;
 
 pub mod prompt;
-pub mod parse;
+pub mod split;
 pub mod completion;
 
 pub use prompt::Prompt;
-pub use parse::split;
+pub use split::split;
 pub use completion::Command;
 
 #[cfg(test)]

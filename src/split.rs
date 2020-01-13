@@ -105,39 +105,40 @@ pub fn split(cmdline: &str) -> Vec<String> {
     let mut act = String::new();
     let mut state = EscapingState::new();
     for ch in cmdline.chars() {
-        if ch.is_whitespace() && !state.whitespace_escaped() {
+        if !state.whitespace_escaped() && ch.is_whitespace() {
             if !act.is_empty() {
                 parts.push(act);
                 act = String::new();
             }
-        } else {
-            match ch {
-                '"' => {
-                    if state.doublequote_escaped() {
-                        act.push(ch);
-                    }
+            continue;
+        }
+
+        match ch {
+            '"' => {
+                if state.doublequote_escaped() {
+                    act.push(ch);
                 }
-                '\'' => {
-                    if state.singlequote_escaped() {
-                        act.push(ch);
-                    }
-                }
-                '\\' => {
-                    if state.backslash_escaped() {
-                        act.push(ch);
-                    }
-                }
-                ch => act.push(ch),
             }
+            '\'' => {
+                if state.singlequote_escaped() {
+                    act.push(ch);
+                }
+            }
+            '\\' => {
+                if state.backslash_escaped() {
+                    act.push(ch);
+                }
+            }
+            ch => act.push(ch),
         }
         state.step(ch);
     }
+
     if !act.is_empty() {
         parts.push(act);
     }
     parts
 }
-
 
 pub fn ends_with_whitespace(text: &str) -> bool {
     if let Some(ch) = text.chars().last() {

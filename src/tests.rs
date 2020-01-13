@@ -1,4 +1,4 @@
-use crate::parse::{split, EscapingState};
+use crate::split::{split, EscapingState};
 
 #[test]
 fn parse_1() {
