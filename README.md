@@ -1,6 +1,7 @@
 [![Crates.io](https://img.shields.io/crates/v/shli.svg)](https://crates.io/crates/shli)
 [![Build Status](https://travis-ci.org/UgnilJoZ/shli.svg?branch=master)](https://travis-ci.org/UgnilJoZ/shli)
 [![Documentation](https://docs.rs/shli/badge.svg)](https://docs.rs/crate/shli/)
+[![dependency status](https://deps.rs/crate/shli/0.3.0/status.svg)](https://deps.rs/crate/shli/0.3.0)
 
 # shli
 Rust crate for shell-like TUIs
