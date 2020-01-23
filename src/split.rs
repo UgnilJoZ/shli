@@ -2,7 +2,7 @@
 ///
 /// An example usage:
 /// ```
-/// use shli::parse::EscapingState;
+/// use shli::split::EscapingState;
 ///
 /// // This will build the string `some_command "some string\"" "some other string`
 /// let cmdline = "some_command \"some string\\\"\" \"some other string";
