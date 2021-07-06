@@ -10,26 +10,27 @@ fn main() {
         Command::new("exit")
     ));
     loop {
+        // read_commandline does all the reading and tab completion
         match p.read_commandline() {
             Ok(line) => {
                 println!("");
-                if ! line.is_empty() {
-                    match line[0].as_str() {
-                        "exit" => break,
-                        "print" | "echo" => if line.len() > 1 {
-                            let mut output = line[1].clone();
-                            for w in &line[2..] {
-                                output.push_str(&format!(" {}", w));
-                            }
-                            println!("{}", output);
+                match line.get(0).map(|s| s.as_str()) {
+                    Some("exit") => break,
+                    Some("print") | Some("echo") => if line.len() > 1 {
+                        let mut output = line[1].clone();
+                        for w in &line[2..] {
+                            output.push_str(&format!(" {}", w));
                         }
-                        cmd => println!("Did not find '{}' command!", cmd),
+                        println!("{}", output);
                     }
+                    Some(cmd) => println!("Did not find '{}' command!", cmd),
+                    None => {}
                 }
             }
             Err(e) => {
                 match e.kind() {
                     std::io::ErrorKind::UnexpectedEof => {
+                        // EOF is not really unexpected here.
                         println!("exit");
                         break;
                     }
