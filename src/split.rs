@@ -142,7 +142,7 @@ pub fn split(cmdline: &str) -> Vec<String> {
 
 pub fn ends_with_whitespace(text: &str) -> bool {
     if let Some(ch) = text.chars().last() {
-        return ch.is_whitespace()
+        return ch.is_whitespace();
     } else {
         false
     }

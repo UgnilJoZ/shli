@@ -7,7 +7,7 @@
 //! use shli::split;
 //! use shli::completion::Command;
 //! use shli::Prompt;
-//! 
+//!
 //! fn main() {
 //!     let mut p = Prompt::new("> ".to_string(), vec!(
 //! 		Command::new("print").arg("--help"),
@@ -53,13 +53,13 @@
 
 extern crate termion;
 
+pub mod completion;
 pub mod prompt;
 pub mod split;
-pub mod completion;
 
+pub use completion::Command;
 pub use prompt::Prompt;
 pub use split::split;
-pub use completion::Command;
 
 #[cfg(test)]
 mod tests;
