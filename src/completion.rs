@@ -84,7 +84,7 @@ impl Command {
     /// use shli::Command;
     ///
     /// let cmd = Command::new("config")
-    /// 	.subcommand(Command::new("commit"));
+    ///     .subcommand(Command::new("commit"));
     /// ```
     pub fn subcommand(mut self, cmd: Command) -> Command {
         self.subcommands.push(cmd);
@@ -128,7 +128,7 @@ fn active_command<'a>(cmdline: &[String], commands: &'a [Command]) -> Option<&'a
             }
         }
     }
-    return result;
+    result
 }
 
 /// Returns the possible arguments (flags, subvommands, …) of `cmd`as `CompletionResult`
@@ -156,9 +156,9 @@ pub fn complete(previous: &str, commands: &[Command]) -> CompletionResult {
     if previous.is_empty() {
         let possible_commands = command_names(commands);
         if possible_commands.is_empty() {
-            return CompletionResult::None;
+            CompletionResult::None
         } else {
-            return CompletionResult::PossibilityList(possible_commands);
+            CompletionResult::PossibilityList(possible_commands)
         }
     } else {
         let mut components = split(previous);
@@ -194,6 +194,6 @@ pub fn complete(previous: &str, commands: &[Command]) -> CompletionResult {
         };
 
         possibilities.retain(|possibility| possibility.starts_with(&to_complete));
-        return CompletionResult::PossibilityList(possibilities);
+        CompletionResult::PossibilityList(possibilities)
     }
 }

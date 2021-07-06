@@ -14,10 +14,10 @@ use termion::raw::RawTerminal;
 /// use shli::{Prompt,Command};
 ///
 /// let mut p = Prompt::new("> ".to_string(), vec!(
-/// 	Command::new("print"),
-/// 	Command::new("echo"),
-/// 	Command::new("cat").arg("--help"),
-/// 	Command::new("exit")
+///     Command::new("print"),
+///     Command::new("echo"),
+///     Command::new("cat").arg("--help"),
+///     Command::new("exit")
 /// ));
 /// ```
 /// Now, use the `read_commandline` method to let the user type a command.
@@ -36,9 +36,9 @@ impl Prompt {
     /// `commands` is the list of available commands used by tab completion.
     pub fn new(prompt_text: String, commands: Vec<Command>) -> Prompt {
         Prompt {
-            prompt_text: prompt_text,
+            prompt_text,
             history: vec![],
-            commands: commands,
+            commands,
         }
     }
 
@@ -51,7 +51,7 @@ impl Prompt {
         right_line: &str,
     ) -> std::io::Result<()> {
         write!(stdout, "\r{}{}{}", &self.prompt_text, line, right_line)?;
-        if right_line.len() != 0 {
+        if !right_line.is_empty() {
             write!(stdout, "{}", cursor::Left(right_line.len() as u16))?;
         }
         stdout.flush()?;
@@ -85,7 +85,7 @@ impl Prompt {
                     }
                     // Now display the new cmdline
                     self.reprint(stdout, &line, right_line)?;
-                } else if possible_words.len() > 1 {
+                } else if !possible_words.is_empty() {
                     // Display the possibilities
                     write!(
                         stdout,
@@ -148,7 +148,7 @@ impl Prompt {
                     }
                 }
                 Ok(Key::Right) => {
-                    if right_line.len() > 0 {
+                    if !right_line.is_empty() {
                         line.push(right_line.remove(0));
                         write!(stdout, "{}", cursor::Right(1))?;
                         stdout.flush()?
@@ -188,7 +188,7 @@ impl Prompt {
                     // ALT+← was pressed.
                     // Remove the last word.
                     let mut words = split(&line);
-                    if let Some(_) = words.pop() {
+                    if words.pop().is_some() {
                         let old_len = line.len();
                         // Build up the cmdline again
                         line = String::new();

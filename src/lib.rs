@@ -10,10 +10,10 @@
 //!
 //! fn main() {
 //!     let mut p = Prompt::new("> ".to_string(), vec!(
-//! 		Command::new("print").arg("--help"),
-//! 		Command::new("echo"),
-//! 		Command::new("exit")
-//! 	));
+//!         Command::new("print").arg("--help"),
+//!         Command::new("echo"),
+//!         Command::new("exit")
+//!     ));
 //!     loop {
 //!         match p.read_commandline() {
 //!             Ok(line) => {

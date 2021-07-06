@@ -13,7 +13,7 @@
 /// // This will succeed, because we made an error at `"some other string`.
 /// assert!(state.whitespace_escaped())
 /// ```
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct EscapingState {
     /// A single quote is active.
     pub single_quote: bool,
@@ -142,7 +142,7 @@ pub fn split(cmdline: &str) -> Vec<String> {
 
 pub fn ends_with_whitespace(text: &str) -> bool {
     if let Some(ch) = text.chars().last() {
-        return ch.is_whitespace();
+        ch.is_whitespace()
     } else {
         false
     }
