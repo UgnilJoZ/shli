@@ -64,7 +64,7 @@ impl Prompt {
         line: &mut String,
         right_line: &str,
     ) -> std::io::Result<()> {
-        match complete(&line, &self.commands) {
+        match complete(line, &self.commands) {
             CompletionResult::None => {}
             CompletionResult::Description(description) => {
                 write!(stdout, "\n\r Parameter help: {}\n\r> {}", description, line)?;
@@ -72,8 +72,8 @@ impl Prompt {
             CompletionResult::PossibilityList(possible_words) => {
                 if possible_words.len() == 1 {
                     // First, replace the last word
-                    let mut words = split(&line);
-                    if !ends_with_whitespace(&line) {
+                    let mut words = split(line);
+                    if !ends_with_whitespace(line) {
                         words.pop();
                     }
                     words.push(possible_words[0].clone());
@@ -84,7 +84,7 @@ impl Prompt {
                         line.push(' ');
                     }
                     // Now display the new cmdline
-                    self.reprint(stdout, &line, right_line)?;
+                    self.reprint(stdout, line, right_line)?;
                 } else if !possible_words.is_empty() {
                     // Display the possibilities
                     write!(

@@ -181,7 +181,7 @@ pub fn complete(previous: &str, commands: &[Command]) -> CompletionResult {
         };
 
         let mut possibilities = if let Some(cmd) = active_command(&components, commands) {
-            if let CompletionResult::PossibilityList(possibilities) = get_possible_completions(&cmd)
+            if let CompletionResult::PossibilityList(possibilities) = get_possible_completions(cmd)
             {
                 possibilities
             } else {
