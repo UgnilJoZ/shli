@@ -21,10 +21,11 @@ fn main() {
                     Some("exit") => break,
                     Some("print") | Some("echo") => {
                         if line.len() > 1 {
-                            let mut output = line[1].clone();
-                            for w in &line[2..] {
-                                output.push_str(&format!(" {}", w));
-                            }
+                            let output = line[1..]
+                                .iter()
+                                .map(|s| &**s)
+                                .collect::<Vec<&str>>()
+                                .join(" ");
                             println!("{}", output);
                         }
                     }
