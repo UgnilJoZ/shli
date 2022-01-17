@@ -1,7 +1,8 @@
 use crate::completion::{complete, Command, CompletionResult};
+use crate::error::Error;
 use crate::split::{ends_with_whitespace, split};
+use std::io::Write;
 use std::io::{stdin, stdout};
-use std::io::{Error, ErrorKind, Write};
 use termion::cursor;
 use termion::event::Key::{self, Alt, Char, Ctrl};
 use termion::input::TermRead;
@@ -118,7 +119,7 @@ impl Prompt {
     /// > print out "example command"
     /// ```
     /// will return `vec!["print", "out", "example command"]`.
-    pub fn read_commandline(&mut self) -> std::io::Result<Vec<String>> {
+    pub fn read_commandline(&mut self) -> Result<Vec<String>, Error> {
         let stdout = stdout();
         let mut stdout = stdout.lock().into_raw_mode()?;
         let stdin = stdin();
@@ -172,12 +173,8 @@ impl Prompt {
                         }
                     }
                 }
-                Ok(Ctrl('c')) => {
-                    return Err(Error::new(ErrorKind::Other, "Ctrl-C pressed."));
-                }
-                Ok(Ctrl('d')) => {
-                    return Err(Error::new(ErrorKind::UnexpectedEof, ""));
-                }
+                Ok(Ctrl('c')) => return Err(Error::CtrlC),
+                Ok(Ctrl('d')) => return Err(Error::CtrlD),
                 Ok(Key::Backspace) => {
                     if line.pop().is_some() {
                         write!(stdout, "{} {}", cursor::Left(1), cursor::Left(1))?;
@@ -210,7 +207,7 @@ impl Prompt {
                     }
                 }
                 Ok(_) => {}
-                Err(e) => return Err(e),
+                Err(e) => return Err(Error::IoError(e)),
             }
         }
         line.push_str(&right_line);

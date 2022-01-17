@@ -1,6 +1,6 @@
 extern crate shli;
 use shli::completion::Command;
-use shli::Prompt;
+use shli::{Prompt, Error};
 
 fn main() {
     let mut p = Prompt::new(
@@ -33,21 +33,12 @@ fn main() {
                     None => {}
                 }
             }
-            Err(e) => {
-                match e.kind() {
-                    std::io::ErrorKind::UnexpectedEof => {
-                        // EOF is not really unexpected here.
-                        println!("exit");
-                        break;
-                    }
-                    std::io::ErrorKind::Other => {
-                        println!("\nCtrl+C pressed.");
-                    }
-                    _ => {
-                        println!("Reading error: {:?}", e);
-                    }
-                };
+            Err(Error::CtrlD) => {
+                    println!("exit");
+                    break;
             }
+            Err(Error::CtrlC) => println!("\nCtrl+C pressed."),
+            Err(Error::IoError(e)) => println!("Reading error: {:?}", e),
         }
     }
 }
