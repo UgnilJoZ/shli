@@ -100,6 +100,25 @@ impl Prompt {
         Ok(())
     }
 
+    /// Convenience function to replace the current edit buffer while prompting
+    fn replace_cmdline(
+        &self,
+        stdout: &mut termion::raw::RawTerminal<std::io::StdoutLock>,
+        new_cmd_line: &str,
+        line: &mut String,
+        right_line: &mut String,
+    ) -> Result<(), Error> {
+        let chars_to_wipe = self.prompt_text.len() + line.len() + right_line.len();
+        *line = String::from(new_cmd_line);
+        write!(stdout, "\r")?;
+        for _ in 0..chars_to_wipe {
+            write!(stdout, " ")?;
+        }
+        *right_line = String::new();
+        self.reprint(stdout, &line, &right_line)?;
+        Ok(())
+    }
+
     /// Prompt for a single command line.
     ///
     /// This function reads and returns a command line.
@@ -161,15 +180,31 @@ impl Prompt {
                         if let Some(new_cmd_line) =
                             self.history.get(self.history.len() - history_offset)
                         {
-                            let chars_to_wipe =
-                                self.prompt_text.len() + line.len() + right_line.len();
-                            line = new_cmd_line.clone();
-                            write!(stdout, "\r")?;
-                            for _ in 0..chars_to_wipe {
-                                write!(stdout, " ")?;
-                            }
-                            right_line = String::new();
-                            self.reprint(&mut stdout, &line, &right_line)?
+                            self.replace_cmdline(
+                                &mut stdout,
+                                new_cmd_line,
+                                &mut line,
+                                &mut right_line,
+                            )?;
+                        }
+                    }
+                }
+                Ok(Key::Down) => {
+                    if history_offset == 1 {
+                        history_offset = 0;
+                        self.replace_cmdline(&mut stdout, "", &mut line, &mut right_line)?;
+                    } else if history_offset > 1 {
+                        history_offset -= 1;
+
+                        if let Some(new_cmd_line) =
+                            self.history.get(self.history.len() - history_offset)
+                        {
+                            self.replace_cmdline(
+                                &mut stdout,
+                                new_cmd_line,
+                                &mut line,
+                                &mut right_line,
+                            )?;
                         }
                     }
                 }
