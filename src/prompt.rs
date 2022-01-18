@@ -115,7 +115,7 @@ impl Prompt {
             write!(stdout, " ")?;
         }
         *right_line = String::new();
-        self.reprint(stdout, &line, &right_line)?;
+        self.reprint(stdout, line, right_line)?;
         Ok(())
     }
 
@@ -200,22 +200,26 @@ impl Prompt {
                     }
                 }
                 Ok(Key::Down) => {
-                    if history_offset == 1 {
-                        history_offset = 0;
-                        self.replace_cmdline(&mut stdout, "", &mut line, &mut right_line)?;
-                    } else if history_offset > 1 {
-                        history_offset -= 1;
-
-                        if let Some(new_cmd_line) =
-                            self.history.get(self.history.len() - history_offset)
-                        {
-                            self.replace_cmdline(
-                                &mut stdout,
-                                new_cmd_line,
-                                &mut line,
-                                &mut right_line,
-                            )?;
+                    match history_offset {
+                        1 => {
+                            history_offset = 0;
+                            self.replace_cmdline(&mut stdout, "", &mut line, &mut right_line)?;
                         }
+                        hoff if hoff > 1 => {
+                            history_offset -= 1;
+
+                            if let Some(new_cmd_line) =
+                                self.history.get(self.history.len() - history_offset)
+                            {
+                                self.replace_cmdline(
+                                    &mut stdout,
+                                    new_cmd_line,
+                                    &mut line,
+                                    &mut right_line,
+                                )?;
+                            }
+                        }
+                        _ => {}
                     }
                 }
                 Ok(Ctrl('c')) => return Err(Error::CtrlC),
