@@ -212,8 +212,7 @@ impl Prompt {
                 Ok(Ctrl('d')) => return Err(Error::CtrlD),
                 Ok(Key::Backspace) => {
                     if line.pop().is_some() {
-                        write!(stdout, "{} {}", cursor::Left(1), cursor::Left(1))?;
-                        stdout.flush()?;
+                        self.reprint(&mut stdout, &line, &format!("{right_line} "))?;
                     }
                 }
                 Ok(Alt('\u{7f}')) => {
