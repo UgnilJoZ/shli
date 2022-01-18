@@ -174,6 +174,16 @@ impl Prompt {
                         stdout.flush()?
                     }
                 }
+                Ok(Key::Home) => {
+                    right_line = format!("{line}{right_line}");
+                    line = String::new();
+                    self.reprint(&mut stdout, &line, &right_line)?;
+                }
+                Ok(Key::End) => {
+                    line.push_str(&right_line);
+                    right_line = String::new();
+                    self.reprint(&mut stdout, &line, &right_line)?;
+                }
                 Ok(Key::Up) => {
                     if history_offset < self.history.len() {
                         history_offset += 1;
