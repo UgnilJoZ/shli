@@ -246,7 +246,9 @@ impl Prompt {
             }
         }
         line.push_str(&right_line);
-        self.history.push(line.clone());
+        if !line.is_empty() {
+            self.history.push(line.clone());
+        }
         Ok(split(&line))
     }
 }
