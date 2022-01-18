@@ -175,7 +175,7 @@ impl Prompt {
                     }
                 }
                 Ok(Key::Home) => {
-                    right_line = format!("{line}{right_line}");
+                    right_line = format!("{}{}", line, right_line);
                     line = String::new();
                     self.reprint(&mut stdout, &line, &right_line)?;
                 }
@@ -226,7 +226,7 @@ impl Prompt {
                 Ok(Ctrl('d')) => return Err(Error::CtrlD),
                 Ok(Key::Backspace) => {
                     if line.pop().is_some() {
-                        self.reprint(&mut stdout, &line, &format!("{right_line} "))?;
+                        self.reprint(&mut stdout, &line, &format!("{} ", right_line))?;
                     }
                 }
                 Ok(Alt('\u{7f}')) => {
